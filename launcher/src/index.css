@@ -1,0 +1,90 @@
+@import "tailwindcss";
+@import "./theme/tokens.css";
+
+/* Map the shared brand tokens onto Tailwind utilities (bg-accent, text-muted, ...).
+   Colours are never written as literals in components; change branding/tokens.json. */
+@theme inline {
+  --color-accent: var(--glint-color-accent);
+  --color-accent-hover: var(--glint-color-accent-hover);
+  --color-on-accent: var(--glint-color-on-accent);
+  --color-bg: var(--glint-color-bg);
+  --color-surface: var(--glint-color-surface);
+  --color-raised: var(--glint-color-raised);
+  --color-border: var(--glint-color-border);
+  --color-text: var(--glint-color-text);
+  --color-muted: var(--glint-color-muted);
+  --color-faint: var(--glint-color-faint);
+  --color-danger: var(--glint-color-danger);
+  --color-warning: var(--glint-color-warning);
+  --color-success: var(--glint-color-success);
+
+  --radius-sm: var(--glint-radius-sm);
+  --radius-md: var(--glint-radius-md);
+  --radius-lg: var(--glint-radius-lg);
+
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "Cascadia Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  /* A desktop app, not a document: no text selection or overscroll by default. */
+  user-select: none;
+  overflow: hidden;
+  cursor: default;
+}
+
+input,
+textarea,
+.selectable {
+  user-select: text;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+input[type="range"] {
+  accent-color: var(--color-accent);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+
+/* Thin, quiet scrollbars. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-faint);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

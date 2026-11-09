@@ -1,0 +1,185 @@
+// Typed wrappers around the Rust commands. Field names match the Rust structs
+// (snake_case); command arguments are camelCase, which Tauri maps to snake_case.
+import { invoke } from "@tauri-apps/api/core";
+
+export type GcPreset = "g1" | "zgc";
+
+export interface ModRef {
+  source: string;
+  project: string;
+}
+
+export interface Instance {
+  id: string;
+  name: string;
+  preset: string | null;
+  mc_version: string;
+  loader_version: string;
+  memory_mb: number;
+  gc: GcPreset;
+  jvm_args: string;
+  java_path: string | null;
+  width: number | null;
+  height: number | null;
+  mods: ModRef[];
+  created_at: number;
+  last_played: number | null;
+}
+
+export interface NewInstance {
+  name: string;
+  preset: string | null;
+  mc_version: string;
+  loader_version: string;
+}
+
+export interface Preset {
+  id: string;
+  name: string;
+  description: string;
+  memory_mb: number;
+  gc: GcPreset;
+  mods: ModRef[];
+}
+
+export interface GameVersion {
+  id: string;
+  kind: string;
+  release_time: string;
+}
+
+export interface GameVersions {
+  latest_release: string;
+  versions: GameVersion[];
+}
+
+export interface LoaderVersion {
+  version: string;
+  stable: boolean;
+}
+
+export interface MemoryLimits {
+  total_mb: number;
+  min_mb: number;
+  max_recommended_mb: number;
+  diminishing_mb: number;
+  slider_max_mb: number;
+}
+
+export interface SystemInfo {
+  launcher_version: string;
+  memory: MemoryLimits;
+  data_dir: string;
+  offline_launch: boolean;
+}
+
+export type SettingSource = "env" | "file" | "builtin";
+
+export interface Settings {
+  azure_client_id: string | null;
+  azure_client_id_source: SettingSource | null;
+  curseforge_api_key: string | null;
+  curseforge_api_key_source: SettingSource | null;
+  max_concurrent_downloads: number;
+}
+
+export interface SettingsInput {
+  azure_client_id: string | null;
+  curseforge_api_key: string | null;
+  max_concurrent_downloads: number;
+}
+
+export interface Account {
+  uuid: string;
+  username: string;
+  added_at: number;
+}
+
+export interface Accounts {
+  active: string | null;
+  accounts: Account[];
+}
+
+export interface LoginPrompt {
+  user_code: string;
+  verification_uri: string;
+  expires_in: number;
+}
+
+export interface LogLine {
+  text: string;
+  err: boolean;
+}
+
+/** Every command rejects with this shape. `kind` is stable; `message` is for people. */
+export interface AppError {
+  kind: string;
+  message: string;
+}
+
+export function toAppError(error: unknown): AppError {
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const e = error as Partial<AppError>;
+    return { kind: e.kind ?? "other", message: String(e.message) };
+  }
+  return { kind: "other", message: String(error) };
+}
+
+export type RunState = "preparing" | "running";
+
+export interface InstanceStateEvent {
+  id: string;
+  state: RunState | "stopped";
+  exit_code: number | null;
+  killed: boolean;
+  error: AppError | null;
+}
+
+export interface InstanceProgressEvent {
+  id: string;
+  stage: string;
+  done: number;
+  total: number;
+}
+
+export interface InstanceLogEvent {
+  id: string;
+  lines: LogLine[];
+}
+
+export interface AuthFinishedEvent {
+  account: Account | null;
+  error: AppError | null;
+}
+
+export const ipc = {
+  systemInfo: () => invoke<SystemInfo>("system_info"),
+  getSettings: () => invoke<Settings>("get_settings"),
+  saveSettings: (settings: SettingsInput) => invoke<Settings>("save_settings", { settings }),
+  openDataFolder: () => invoke<void>("open_data_folder"),
+
+  listGameVersions: (includeSnapshots: boolean) =>
+    invoke<GameVersions>("list_game_versions", { includeSnapshots }),
+  listLoaderVersions: (mcVersion: string) =>
+    invoke<LoaderVersion[]>("list_loader_versions", { mcVersion }),
+
+  listPresets: () => invoke<Preset[]>("list_presets"),
+  listInstances: () => invoke<Instance[]>("list_instances"),
+  createInstance: (instance: NewInstance) => invoke<Instance>("create_instance", { new: instance }),
+  updateInstance: (instance: Instance) => invoke<Instance>("update_instance", { instance }),
+  deleteInstance: (id: string) => invoke<void>("delete_instance", { id }),
+  duplicateInstance: (id: string) => invoke<Instance>("duplicate_instance", { id }),
+  openInstanceFolder: (id: string) => invoke<void>("open_instance_folder", { id }),
+
+  launchInstance: (id: string, offline: boolean) =>
+    invoke<void>("launch_instance", { id, offline }),
+  stopInstance: (id: string) => invoke<void>("stop_instance", { id }),
+  instanceStates: () => invoke<Record<string, RunState>>("instance_states"),
+  instanceLog: (id: string) => invoke<LogLine[]>("instance_log", { id }),
+
+  authBegin: () => invoke<LoginPrompt>("auth_begin"),
+  authCancel: () => invoke<void>("auth_cancel"),
+  listAccounts: () => invoke<Accounts>("list_accounts"),
+  setActiveAccount: (uuid: string) => invoke<Accounts>("set_active_account", { uuid }),
+  removeAccount: (uuid: string) => invoke<Accounts>("remove_account", { uuid }),
+};

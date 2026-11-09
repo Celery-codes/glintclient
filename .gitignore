@@ -1,0 +1,29 @@
+# Rust
+target/
+
+# Node
+node_modules/
+dist/
+
+# Generated from branding/ by launcher/scripts/gen-tokens.mjs
+launcher/src/theme/tokens.css
+launcher/public/logo.svg
+
+# Gradle (client-mod)
+.gradle/
+build/
+run/
+
+# Local configuration and secrets. Config lives in the app data folder or the
+# environment, never in the repo.
+.env
+.env.*
+!.env.example
+
+# Editors and OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.iml
+.DS_Store
+Thumbs.db
