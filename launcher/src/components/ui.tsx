@@ -55,16 +55,29 @@ export function Button({
 }
 
 const FIELD =
-  "h-9 w-full rounded-md border border-border bg-bg px-3 text-text placeholder:text-faint " +
+  "h-9 rounded-md border border-border bg-bg px-3 text-text placeholder:text-faint " +
   "transition-colors hover:border-faint focus:border-accent focus:outline-none " +
   "disabled:opacity-50 disabled:hover:border-border";
 
+/** Fields fill their container unless the caller sets a width. Two width classes on
+ *  one element would leave the winner up to stylesheet order. */
+function fieldWidth(className?: string): string | false {
+  return !/(^|s)w-/.test(className ?? "") && "w-full";
+}
+
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input spellCheck={false} autoComplete="off" {...props} className={cx(FIELD, className)} />;
+  return (
+    <input
+      spellCheck={false}
+      autoComplete="off"
+      {...props}
+      className={cx(FIELD, fieldWidth(className), className)}
+    />
+  );
 }
 
 export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={cx(FIELD, "pr-2", className)} />;
+  return <select {...props} className={cx(FIELD, fieldWidth(className), "pr-2", className)} />;
 }
 
 interface FieldProps {

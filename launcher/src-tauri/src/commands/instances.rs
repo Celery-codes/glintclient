@@ -5,17 +5,8 @@ use glint_core::{
 use tauri::{AppHandle, State};
 use tauri_plugin_opener::OpenerExt;
 
-use super::CmdResult;
+use super::{CmdResult, ensure_idle};
 use crate::state::AppState;
-
-fn ensure_idle(state: &AppState, id: &str, action: &str) -> CmdResult<()> {
-    if state.activity.lock().unwrap().contains_key(id) {
-        return Err(Error::Launch(format!(
-            "Stop the game before you {action} this instance."
-        )));
-    }
-    Ok(())
-}
 
 #[tauri::command]
 pub fn list_presets() -> Vec<Preset> {

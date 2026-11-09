@@ -4,6 +4,7 @@ import { cx, formatMemory } from "../lib/format";
 import { ipc, toAppError, type Preset } from "../lib/ipc";
 import { recommendedLoader, useGameVersions, useLoaderVersions } from "../lib/useVersions";
 import { useInstances } from "../stores/instances";
+import { useMods } from "../stores/mods";
 import { Button, Dialog, Field, Input, Select } from "./ui";
 
 export function NewInstanceDialog({ onClose }: { onClose: () => void }) {
@@ -60,7 +61,9 @@ export function NewInstanceDialog({ onClose }: { onClose: () => void }) {
         loader_version: loader,
       });
       onClose();
-      navigate(`/instances/${instance.id}`);
+      // The preset's mods install in the background; the Mods tab shows progress.
+      void useMods.getState().installPreset(instance.id);
+      navigate(`/instances/${instance.id}?tab=mods`);
     } catch (e) {
       setError(toAppError(e).message);
       setBusy(false);

@@ -12,9 +12,15 @@ A Minecraft: Java Edition client: a desktop launcher and a Fabric client mod.
 
 ## Status
 
-Phase 1 (launcher core) is built: Microsoft sign-in, instances with presets, automatic
-Java, installing and launching Minecraft with Fabric, and a live game log. The mod
-browser, the client mod, and onboarding/skins come next.
+Built so far:
+
+- **Launcher core:** Microsoft sign-in, instances with presets, automatic Java, installing
+  and launching Minecraft with Fabric, and a live game log.
+- **Mod browser:** search Modrinth and CurseForge together, install with dependencies,
+  enable and disable per instance, and update checks. Presets install their mods when an
+  instance is created.
+
+The client mod and onboarding/skins come next.
 
 ## Requirements
 
@@ -30,6 +36,7 @@ npm install
 npm run tauri dev      # run the launcher
 npm run tauri build    # build the installer
 cargo test -p glint-core
+cargo test -p glint-core --test live_mods -- --ignored   # checks against the real Modrinth API
 ```
 
 `glint-core` also has a headless end-to-end check that installs and starts the game
@@ -66,7 +73,7 @@ Settings page. Two values can also come from the environment, which takes preced
 | Variable | Purpose |
 |---|---|
 | `GLINT_AZURE_CLIENT_ID` | Azure application (client) ID |
-| `GLINT_CURSEFORGE_API_KEY` | CurseForge API key for the mod browser |
+| `GLINT_CURSEFORGE_API_KEY` | CurseForge API key for the mod browser. Without one, the browser shows Modrinth only. |
 
 Setting either variable at build time bakes it into the binary as the default, which is
 how a public build would ship them. Nothing is hardcoded in the source.

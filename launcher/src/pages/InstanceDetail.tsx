@@ -1,7 +1,8 @@
 import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
 import { ArrowLeft, Copy, FolderOpen, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { InstanceMods } from "../components/InstanceMods";
 import { LogView } from "../components/LogView";
 import { MemorySlider } from "../components/MemorySlider";
 import { PlayButton, RunStatus } from "../components/PlayButton";
@@ -13,7 +14,8 @@ import { useInstances } from "../stores/instances";
 import { useSystem } from "../stores/system";
 import { toast } from "../stores/toasts";
 
-type Tab = "log" | "settings";
+const TABS = ["log", "mods", "settings"] as const;
+type Tab = (typeof TABS)[number];
 
 const GC_HINTS: Record<GcPreset, string> = {
   g1: "Tuned for short, steady pauses. The safe choice for almost every setup.",
@@ -28,7 +30,10 @@ export function InstanceDetail() {
   const run = useInstances((s) => s.runs[id]);
   const offlineLaunch = useSystem((s) => s.info?.offline_launch ?? false);
   const { play, remove, duplicate } = useInstances.getState();
-  const [tab, setTab] = useState<Tab>("log");
+  // The tab lives in the URL so other pages can link straight to one.
+  const [params, setParams] = useSearchParams();
+  const tab: Tab = TABS.find((t) => t === params.get("tab")) ?? "log";
+  const setTab = (next: Tab) => setParams(next === "log" ? {} : { tab: next }, { replace: true });
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   if (!instance) {
@@ -79,7 +84,7 @@ export function InstanceDetail() {
           </div>
         )}
         <div className="flex gap-1 border-b border-border" role="tablist">
-          {(["log", "settings"] as const).map((t) => (
+          {TABS.map((t) => (
             <button
               key={t}
               type="button"
@@ -102,6 +107,8 @@ export function InstanceDetail() {
       <div className="min-h-0 flex-1 px-8 pb-6">
         {tab === "log" ? (
           <LogView id={instance.id} />
+        ) : tab === "mods" ? (
+          <InstanceMods key={instance.id} instance={instance} running={!!run} />
         ) : (
           <div className="h-full overflow-y-auto pr-2">
             {/* Keyed so switching instances resets the form. */}

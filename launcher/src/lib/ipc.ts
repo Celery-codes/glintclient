@@ -152,6 +152,71 @@ export interface AuthFinishedEvent {
   error: AppError | null;
 }
 
+export type ModSource = "modrinth" | "curseforge";
+
+export interface ModCategory {
+  id: string;
+  label: string;
+}
+
+export interface SearchHit {
+  source: ModSource;
+  project_id: string;
+  slug: string;
+  title: string;
+  description: string;
+  author: string;
+  icon_url: string | null;
+  downloads: number;
+  page_url: string;
+  /** False when the author only allows downloads from the mod's own page. */
+  downloadable: boolean;
+}
+
+export interface SearchRequest {
+  text: string;
+  source: "all" | ModSource;
+  category: string | null;
+  mc_version: string | null;
+  fabric_only: boolean;
+  page: number;
+}
+
+export interface SearchResponse {
+  hits: SearchHit[];
+  has_more: boolean;
+  curseforge_enabled: boolean;
+  warnings: string[];
+}
+
+export interface InstalledMod {
+  filename: string;
+  enabled: boolean;
+  title: string;
+  version_name: string;
+  source: ModSource | null;
+  project_id: string | null;
+  slug: string | null;
+  version_id: string | null;
+  icon_url: string | null;
+  page_url: string | null;
+  size: number;
+}
+
+export interface InstallOutcome {
+  installed: InstalledMod[];
+  already_installed: string[];
+  manual: { title: string; page_url: string }[];
+  failed: { project: string; message: string }[];
+}
+
+export interface ModUpdate {
+  filename: string;
+  title: string;
+  current_version: string;
+  new_version: string;
+}
+
 export const ipc = {
   systemInfo: () => invoke<SystemInfo>("system_info"),
   getSettings: () => invoke<Settings>("get_settings"),
@@ -170,6 +235,19 @@ export const ipc = {
   deleteInstance: (id: string) => invoke<void>("delete_instance", { id }),
   duplicateInstance: (id: string) => invoke<Instance>("duplicate_instance", { id }),
   openInstanceFolder: (id: string) => invoke<void>("open_instance_folder", { id }),
+
+  modCategories: () => invoke<ModCategory[]>("mod_categories"),
+  searchMods: (request: SearchRequest) => invoke<SearchResponse>("search_mods", { request }),
+  listInstanceMods: (id: string) => invoke<InstalledMod[]>("list_instance_mods", { id }),
+  installMod: (id: string, source: ModSource, project: string) =>
+    invoke<InstallOutcome>("install_mod", { id, source, project }),
+  installPresetMods: (id: string) => invoke<InstallOutcome>("install_preset_mods", { id }),
+  setModEnabled: (id: string, filename: string, enabled: boolean) =>
+    invoke<InstalledMod>("set_mod_enabled", { id, filename, enabled }),
+  removeMod: (id: string, filename: string) => invoke<void>("remove_mod", { id, filename }),
+  checkModUpdates: (id: string) => invoke<ModUpdate[]>("check_mod_updates", { id }),
+  updateMod: (id: string, filename: string) =>
+    invoke<InstalledMod>("update_mod", { id, filename }),
 
   launchInstance: (id: string, offline: boolean) =>
     invoke<void>("launch_instance", { id, offline }),

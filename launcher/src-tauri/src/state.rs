@@ -32,6 +32,9 @@ pub struct AppState {
     pub activity: Mutex<HashMap<String, Activity>>,
     pub logs: Mutex<HashMap<String, VecDeque<LogLine>>>,
     pub pending_login: Mutex<Option<AbortHandle>>,
+    /// Serialises changes to mod folders and their indexes, so two installs can't
+    /// overwrite each other's bookkeeping.
+    pub mods_lock: tokio::sync::Mutex<()>,
 }
 
 impl AppState {
@@ -45,6 +48,7 @@ impl AppState {
             activity: Mutex::default(),
             logs: Mutex::default(),
             pending_login: Mutex::default(),
+            mods_lock: tokio::sync::Mutex::default(),
         })
     }
 

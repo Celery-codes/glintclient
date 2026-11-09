@@ -43,3 +43,20 @@ const STAGE_LABELS: Record<string, string> = {
 export function stageLabel(stage: string): string {
   return STAGE_LABELS[stage] ?? "Preparing";
 }
+
+/** "1.2K", "250M" */
+export function formatCount(n: number): string {
+  if (n < 1000) return String(n);
+  const units: [number, string][] = [
+    [1e9, "B"],
+    [1e6, "M"],
+    [1e3, "K"],
+  ];
+  for (const [size, suffix] of units) {
+    if (n >= size) {
+      const value = n / size;
+      return `${value >= 100 ? Math.round(value) : value.toFixed(1).replace(/\.0$/, "")}${suffix}`;
+    }
+  }
+  return String(n);
+}

@@ -139,7 +139,7 @@ export function Settings() {
             label="API key"
             hint={
               sourceNote(saved.curseforge_api_key_source, "GLINT_CURSEFORGE_API_KEY") ??
-              "Needed to search and install from CurseForge once the mod browser exists. Modrinth needs no key."
+              "Needed to search and install mods from CurseForge. Modrinth needs no key."
             }
           >
             {(id) => (
